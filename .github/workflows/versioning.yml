@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get the current version
         id: get_version
@@ -33,6 +35,7 @@ jobs:
           git commit -m "Bump version to $VERSION"
           git tag -a "v$VERSION" -m "Version $VERSION"
 
+          # Configure git to use the PAT
           git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
           git push origin --tags
