@@ -1,0 +1,55 @@
+name: Versioning
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Get the current version
+        id: get_version
+        run: |
+          VERSION=$(cat version.txt)
+          echo "Current version: $VERSION"
+          echo "::set-output name=version::$VERSION"
+
+      - name: Bump version and tag
+        id: bump_version
+        run: |
+          # Bump the version (this example just increments the patch version)
+          VERSION=$(echo ${{ steps.get_version.outputs.version }} | awk -F. '{$3+=1; OFS="."; print $1,$2,$3}')
+          echo "New version: $VERSION"
+          echo $VERSION > version.txt
+
+          # Commit and push changes
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.txt
+          git commit -m "Bump version to $VERSION"
+          git tag -a "v$VERSION" -m "Version $VERSION"
+          git push origin --tags
+          git push
+
+      - name: Update composer.json
+        if: steps.get_version.outputs.version != steps.bump_version.outputs.version
+        run: |
+          # Update the composer.json version if it exists
+          if [ -f "composer.json" ]; then
+            jq --arg version "$VERSION" '.version = $version' composer.json > composer.tmp.json
+            mv composer.tmp.json composer.json
+            git add composer.json
+            git commit -m "Update composer.json version to $VERSION"
+            git push
+          fi
