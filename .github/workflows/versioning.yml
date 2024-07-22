@@ -38,16 +38,18 @@ jobs:
           echo "Current version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Bump version and tag
+      - name: Bump version and update files
         id: bump_version
         run: |
+          # Increment the version
           VERSION=$(echo $VERSION | awk -F. '{$3+=1; OFS="."; print $1,$2,$3}')
           echo "New version: $VERSION"
           echo $VERSION > version.txt
 
-          # Update composer.json
-          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" composer.json
+          # Update composer.json with the new version
+          sed -i 's/"version": "[^"]*"/"version": "'$VERSION'"/' composer.json
 
+          # Commit the changes and create a tag
           git add version.txt composer.json
           git commit -m "Bump version to $VERSION"
           git tag -a "v$VERSION" -m "Version $VERSION"
@@ -55,5 +57,6 @@ jobs:
           # Configure git to use the PAT
           git config --global url."https://x-access-token:${{ secrets.MY_PAT }}@github.com/".insteadOf "https://github.com/"
 
+          # Push the changes
           git push origin --tags
           git push
