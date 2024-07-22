@@ -1,21 +1,36 @@
-
-name: Bump Version
+name: Versioning
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  bump_version:
+  update_version:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.MY_PAT }}
 
       - name: Set up Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for version bump commit
+        id: check_commit
+        run: |
+          LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "LAST_COMMIT_MESSAGE=$LAST_COMMIT_MESSAGE" >> $GITHUB_ENV
+
+      - name: Exit if version bump
+        if: contains(env.LAST_COMMIT_MESSAGE, 'Bump version to')
+        run: |
+          echo "Version bump detected, exiting."
+          exit 0
 
       - name: Get the current version
         id: get_version
