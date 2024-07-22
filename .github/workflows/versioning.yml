@@ -1,1 +1,43 @@
+name: Versioning
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_version:
+    runs-on: ubuntu-latest
+    if: github.event.head_commit.message != 'Bump version'  # Skip if last commit is a version bump
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get the current version
+        id: get_version
+        run: |
+          VERSION=$(cat version.txt)
+          echo "Current version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Bump version and tag
+        id: bump_version
+        run: |
+          VERSION=$(echo $VERSION | awk -F. '{$3+=1; OFS="."; print $1,$2,$3}')
+          echo "New version: $VERSION"
+          echo $VERSION > version.txt
+
+          git add version.txt
+          git commit -m "Bump version to $VERSION"
+          git tag -a "v$VERSION" -m "Version $VERSION"
+
+          git push origin --tags
+          git push
