@@ -2,7 +2,7 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "version": "2.0.7",
+    "version": "2.0.8",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
