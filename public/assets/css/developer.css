@@ -1,0 +1,14 @@
+.edit, .delete {
+    font-size: 1.2em; /* Increase icon size */
+    margin: 0 5px; /* Add margin for proper spacing */
+    vertical-align: middle; /* Ensure vertical alignment */
+}
+.edit:hover {
+    color: #007bff; /* Add hover effect */
+}
+.delete {
+    color: #f85359; /* Set delete button color to red */
+}
+.delete:hover {
+    color: darkred; /* Add hover effect for delete button */
+}
