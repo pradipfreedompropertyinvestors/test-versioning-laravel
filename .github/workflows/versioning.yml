@@ -15,9 +15,7 @@ jobs:
 
       - name: Get the last commit message
         id: get_last_commit
-        run: |
-          LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "LAST_COMMIT_MESSAGE=$LAST_COMMIT_MESSAGE" >> $GITHUB_ENV
+        run: echo "LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
 
       - name: Check commit message and exit if not 'UPDATE'
         id: check_commit_message
