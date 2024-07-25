@@ -1,4 +1,4 @@
-name: Show Last Commit Message
+name: Versioning
 
 on:
   push:
@@ -6,25 +6,47 @@ on:
       - main
 
 jobs:
-  display_commit_message:
+  update_version:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Get the last commit message
         id: get_last_commit
-        run: echo "::set-output name=message::$(git log -1 --pretty=%B)"
+        run: echo "LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
 
-      - name: Check commit message and exit if not 'UPDATE'
-        id: check_commit_message
+      - name: Exit if version bump
+        if: contains(steps.get_last_commit.outputs.LAST_COMMIT_MESSAGE, 'UPDATE')
+        run: exit 0
+
+      - name: Get the current version
+        id: get_version
         run: |
-          if [[ "${{ steps.get_last_commit.outputs.message }}" != *"UPDATE"* ]]; then
-            echo "Commit message does not contain 'UPDATE'. Exiting."
-            exit 0
-          fi
+          VERSION=$(cat version.txt)
+          echo "Current version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Display last commit message
-        if: contains(steps.get_last_commit.outputs.message, 'UPDATE')
-        run: echo "Last commit message: ${{ steps.get_last_commit.outputs.message }}"
+      - name: Bump version
+        id: bump_version
+        run: |
+          VERSION=$(echo $VERSION | awk -F. '{$3+=1; OFS="."; print $1,$2,$3}')
+          echo "New version: $VERSION"
+          echo $VERSION > version.txt
+          jq '.version = "'$VERSION'"' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
+
+      - name: Commit and push changes
+        run: |
+          git add version.txt composer.json
+          git commit -m "Bump version to $VERSION"
+          git tag -a "v$VERSION" -m "Version $VERSION"
+          git push origin --tags
+          git push
