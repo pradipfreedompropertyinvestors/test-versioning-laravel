@@ -14,8 +14,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get last commit message
-        id: commit_message
-        run: echo "::set-output name=message::$(git log -1 --pretty=%B)"
+        run: |
+          LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "LAST_COMMIT_MSG=$LAST_COMMIT_MSG" >> $GITHUB_ENV
       
       - name: Display last commit message
-        run: echo "Last commit message: ${{ steps.commit_message.outputs.message }}"
+        run: echo "Last commit message: $LAST_COMMIT_MSG"
