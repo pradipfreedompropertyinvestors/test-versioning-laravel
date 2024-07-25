@@ -24,11 +24,21 @@ jobs:
         id: get_last_commit
         run: |
           LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "last_commit_message=$LAST_COMMIT_MESSAGE" >> $GITHUB_ENV
-          echo "::set-output name=message::$LAST_COMMIT_MESSAGE"
+          echo "$LAST_COMMIT_MESSAGE" > message.txt
+          echo "LAST_COMMIT_MESSAGE=$LAST_COMMIT_MESSAGE" >> $GITHUB_ENV
+
+      - name: Read last commit message from file
+        id: read_message
+        run: |
+          if [ -f message.txt ]; then
+            LAST_COMMIT_MESSAGE_FILE=$(cat message.txt)
+            echo "LAST_COMMIT_MESSAGE_FILE=$LAST_COMMIT_MESSAGE_FILE" >> $GITHUB_ENV
+          else
+            echo "LAST_COMMIT_MESSAGE_FILE=none" >> $GITHUB_ENV
+          fi
 
       - name: Exit if version bump
-        if: contains(steps.get_last_commit.outputs.LAST_COMMIT_MESSAGE, 'UPDATE')
+        if: env.LAST_COMMIT_MESSAGE_FILE == 'Bump version to $VERSION'
         run: exit 0
 
       - name: Get the current version
@@ -48,7 +58,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git add version.txt composer.json
+          git add version.txt composer.json message.txt
           git commit -m "Bump version to $VERSION"
           git tag -a "v$VERSION" -m "Version $VERSION"
           git push origin --tags
