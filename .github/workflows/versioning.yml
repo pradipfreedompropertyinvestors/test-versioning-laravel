@@ -48,7 +48,7 @@ jobs:
       - name: Commit and push changes
         run: |
           git add version.txt composer.json
-          git commit -m "Bump version to $VERSION"
+          git commit -m "Bump version to"
           git tag -a "v$VERSION" -m "Version $VERSION"
           git push origin --tags
           git push
