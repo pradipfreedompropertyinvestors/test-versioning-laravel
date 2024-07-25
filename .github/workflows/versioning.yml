@@ -3,20 +3,17 @@ name: Show Last Commit Message
 on:
   push:
     branches:
-      - main  # Change to your desired branch
+      - main
 
 jobs:
-  display-commit-message:
+  display_commit_message:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Get last commit message
+      - name: Get the last commit message
         run: |
-          LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
-          echo "LAST_COMMIT_MSG=$LAST_COMMIT_MSG" >> $GITHUB_ENV
-      
-      - name: Display last commit message
-        run: echo "Last commit message: $LAST_COMMIT_MSG"
+          LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "Last commit message: $LAST_COMMIT_MESSAGE"
