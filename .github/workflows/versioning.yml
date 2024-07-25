@@ -22,12 +22,10 @@ jobs:
 
       - name: Get the last commit message
         id: get_last_commit
-        run: |
-          LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "LAST_COMMIT_MESSAGE=$LAST_COMMIT_MESSAGE" >> $GITHUB_ENV
+        run: echo "LAST_COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
 
       - name: Exit if version bump
-        if: contains(env.LAST_COMMIT_MESSAGE, 'Bump version to')
+        if: contains(steps.get_last_commit.outputs.LAST_COMMIT_MESSAGE, 'Bump version to')
         run: exit 0
 
       - name: Get the current version
@@ -48,7 +46,7 @@ jobs:
       - name: Commit and push changes
         run: |
           git add version.txt composer.json
-          git commit -m "Bump version to"
+          git commit -m "Bump version to $VERSION"
           git tag -a "v$VERSION" -m "Version $VERSION"
           git push origin --tags
           git push
