@@ -2,7 +2,7 @@
   "name": "laravel/laravel",
   "type": "project",
   "description": "The skeleton application for the Laravel framework.",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "keywords": [
     "laravel",
     "framework"
