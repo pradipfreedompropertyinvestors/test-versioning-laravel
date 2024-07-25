@@ -1,0 +1,21 @@
+name: Show Last Commit Message
+
+on:
+  push:
+    branches:
+      - main  # Change to your desired branch
+
+jobs:
+  display-commit-message:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get last commit message
+        id: commit_message
+        run: echo "::set-output name=message::$(git log -1 --pretty=%B)"
+      
+      - name: Display last commit message
+        run: echo "Last commit message: ${{ steps.commit_message.outputs.message }}"
