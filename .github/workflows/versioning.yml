@@ -28,5 +28,5 @@ jobs:
           fi
 
       - name: Display last commit message
-        if: contains(env.LAST_COMMIT_MESSAGE, 'UPDATE')
-        run: echo "Last commit message: ${{ env.LAST_COMMIT_MESSAGE }}" 
+        if: contains(steps.get_last_commit.outputs.LAST_COMMIT_MESSAGE, 'UPDATE')
+        run: echo "Last commit message: ${{ steps.get_last_commit.outputs.LAST_COMMIT_MESSAGE }}"
