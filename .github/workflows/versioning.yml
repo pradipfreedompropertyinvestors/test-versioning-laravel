@@ -38,7 +38,7 @@ jobs:
       - name: Check if commit message indicates version bump
         id: check_version_bump
         run: |
-          if [[ "${{ env.LAST_COMMIT_MESSAGE }}" == *"Bump version to"* ]]; then
+          if [[ "UPDATE" == *"UPDATE"* ]]; then
             echo "Skipping version bump as it was triggered by a version bump commit"
             exit 0
           fi
