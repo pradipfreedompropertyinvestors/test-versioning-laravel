@@ -10,7 +10,7 @@ use App\Http\Requests\StoreDistrictRequest;
 
 class DistrictController extends Controller {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource TEST Data.
      */
     public function index(Request $request) {
         if ($request->ajax()) {
