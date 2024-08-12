@@ -1,9 +1,9 @@
 name: Versioning
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
+    - main
 
 jobs:
   update_version:
@@ -15,34 +15,6 @@ jobs:
         with:
           token: ${{ secrets.MY_PAT }}
 
-      - name: Set up Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Get last commit message
-        id: get_last_commit
-        run: |
-          git log -1 --pretty=%B > message.txt
-
-      - name: Read last commit message
-        id: read_message
-        run: |
-          if [ -f message.txt ]; then
-            LAST_COMMIT_MESSAGE=$(cat message.txt)
-            echo "LAST_COMMIT_MESSAGE=$LAST_COMMIT_MESSAGE" >> $GITHUB_ENV
-          else
-            echo "LAST_COMMIT_MESSAGE=none" >> $GITHUB_ENV
-          fi
-
-      - name: Check if commit message indicates version bump
-        id: check_version_bump
-        run: |
-          if [[ "UPDATE" == "UPDATE" ]]; then
-            echo "Skipping version bump as it was triggered by a version bump commit"
-            exit 0
-          fi
-
       - name: Get the current version
         id: get_version
         run: |
@@ -50,18 +22,21 @@ jobs:
           echo "Current version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Bump version
+      - name: Bump version and tag
         id: bump_version
         run: |
           VERSION=$(echo $VERSION | awk -F. '{$3+=1; OFS="."; print $1,$2,$3}')
           echo "New version: $VERSION"
           echo $VERSION > version.txt
-          jq '.version = "'$VERSION'"' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
 
-      - name: Commit and push changes
-        run: |
-          git add version.txt composer.json
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.txt
           git commit -m "Bump version to $VERSION"
           git tag -a "v$VERSION" -m "Version $VERSION"
+
+          # Configure git to use the PAT
+          git config --global url."https://x-access-token:${{ secrets.MY_PAT }}@github.com/".insteadOf "https://github.com/"
+
           git push origin --tags
           git push
